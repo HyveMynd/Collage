@@ -8,20 +8,27 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Gallery;
-import android.widget.ImageView;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 /**
  * Created by Andres on 11/5/13.
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class CollageFragment extends Fragment {
-    private ImageView collageAreaLayout;
+    private PhotoCollageView photoCollageView;
+    private LinearLayout mainLayout;
+    private FrameLayout innerLayout;
+    private CropOverlay overlayView;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        collageAreaLayout = new ImageView(activity);
+        photoCollageView = new PhotoCollageView(activity);
+        mainLayout = new LinearLayout(activity);
+        mainLayout.setOrientation(LinearLayout.VERTICAL);
+        innerLayout = new FrameLayout(activity);
+        overlayView = new CropOverlay(activity);
     }
 
     @Override
@@ -31,7 +38,21 @@ public class CollageFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        collageAreaLayout.setLayoutParams(new Gallery.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        return super.onCreateView(inflater, container, savedInstanceState);
+        mainLayout.addView(innerLayout, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+        innerLayout.addView(photoCollageView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        innerLayout.addView(overlayView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        return mainLayout;
+    }
+
+    @Override
+    public void onPause() {
+        photoCollageView.unloadImages();
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        photoCollageView.loadImages(this.getActivity());
+        super.onResume();
     }
 }
