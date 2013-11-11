@@ -4,9 +4,14 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.ListFragment;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -16,42 +21,103 @@ import android.widget.LinearLayout;
  */
 public class CollageActivity extends Activity {
     private CollageModel model;
-    private CollageLibraryFragment libraryFragment;
+    private ImageLibraryFragment libraryFragment;
     private CollageFragment collageFragment;
+    private LinearLayout mainLayout;
+    private FrameLayout collageAreaLayout, imageListLayout;
+    private boolean isHorizontal;
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // news
-        model = ((CollageApplication)this.getApplication()).getModelInstance();
-        libraryFragment = new CollageLibraryFragment();
+        model = ((CollageApplication)this.getApplication()).getModel();
+        libraryFragment = new ImageLibraryFragment();
         collageFragment = new CollageFragment();
-        LinearLayout mainLayout = new LinearLayout(this);
-        FrameLayout imageListLayout = new FrameLayout(this);
-        FrameLayout collageAreaLayout = new FrameLayout(this);
 
-//        FragmentManager fragmentManager = this.getFragmentManager();
-//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//        fragmentTransaction.add(imageList.getId(), libraryFragment);
-//        fragmentTransaction.add(collageArea.getId(), collageFragment);
-//        fragmentTransaction.commit();
-
-        // Setup main layout
+        mainLayout = new LinearLayout(this);
         mainLayout.setOrientation(LinearLayout.HORIZONTAL);
-        mainLayout.addView(collageAreaLayout, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
-        mainLayout.addView(imageListLayout, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 2));
+        setContentView(mainLayout);
 
         // Setup collage area layouts
-        collageAreaLayout.setBackgroundColor(Color.BLUE);
-        collageAreaLayout.setId(10);
+        collageAreaLayout = new FrameLayout(this);
+        collageAreaLayout.setBackgroundColor(Color.DKGRAY);
+        collageAreaLayout.setId(42);
 
         // Setup list
-        imageListLayout.setBackgroundColor(Color.RED);
-        imageListLayout.setId(11);
+        imageListLayout = new FrameLayout(this);
+        imageListLayout.setBackgroundColor(Color.BLACK);
+        imageListLayout.setId(43);
 
-        setContentView(mainLayout);
+        if (getScreenOrientation() == Configuration.ORIENTATION_LANDSCAPE){
+            horizontalInit();
+            isHorizontal = true;
+        } else {
+            verticalInit();
+            isHorizontal = false;
+        }
+        ((CollageApplication)getApplication()).loadTestData(getResources());
+    }
+
+    private int getScreenOrientation(){
+        return getResources().getConfiguration().orientation;
+    }
+
+    private void horizontalInit(){
+        mainLayout.addView(collageAreaLayout, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 2));
+        mainLayout.addView(imageListLayout, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
+        FragmentManager fragmentManager = this.getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(imageListLayout.getId(), libraryFragment);
+        fragmentTransaction.add(collageAreaLayout.getId(), collageFragment);
+        fragmentTransaction.commit();
+    }
+
+    private void verticalInit(){
+        mainLayout.addView(collageAreaLayout, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        FragmentTransaction fragmentTransaction = this.getFragmentManager().beginTransaction();
+        fragmentTransaction.add(collageAreaLayout.getId(), collageFragment);
+        fragmentTransaction.add(collageAreaLayout.getId(), libraryFragment);
+        fragmentTransaction.hide(libraryFragment);
+        fragmentTransaction.commit();
+    }
+
+    private void hideLibrary(){
+        FragmentTransaction ft = this.getFragmentManager().beginTransaction();
+        ft.hide(libraryFragment);
+        ft.commit();
+    }
+
+    private void showLibrary(){
+        FragmentTransaction ft = this.getFragmentManager().beginTransaction();
+        ft.show(libraryFragment);
+        ft.commit();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_items, menu);
+        if (isHorizontal){
+            menu.getItem(0).setVisible(false);
+        } else {
+            menu.getItem(0).setVisible(true);
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_add_image:
+                showLibrary();
+                return true;
+            case R.id.action_take_picture:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

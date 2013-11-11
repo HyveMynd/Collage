@@ -19,16 +19,17 @@ public class CollageFragment extends Fragment {
     private PhotoCollageView photoCollageView;
     private LinearLayout mainLayout;
     private FrameLayout innerLayout;
-    private CropOverlay overlayView;
+    private CollageModel model;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        model = ((CollageApplication)activity.getApplication()).getModel();
         photoCollageView = new PhotoCollageView(activity);
         mainLayout = new LinearLayout(activity);
         mainLayout.setOrientation(LinearLayout.VERTICAL);
         innerLayout = new FrameLayout(activity);
-        overlayView = new CropOverlay(activity);
+        photoCollageView.setImages(model.getImages());
     }
 
     @Override
@@ -40,7 +41,6 @@ public class CollageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mainLayout.addView(innerLayout, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
         innerLayout.addView(photoCollageView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        innerLayout.addView(overlayView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         return mainLayout;
     }
 

@@ -1,20 +1,14 @@
-package edu.uofu.cs4862.collage;
+package edu.uofu.cs4862.collage.multitouch;
 
-import android.graphics.drawable.Drawable;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.Canvas;
 
 import android.content.res.Resources;
 import android.content.Context;
 
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.IOException;
+import edu.uofu.cs4862.collage.ImageData;
 
 
 public class ImageEntity extends MultiTouchEntity {
@@ -27,7 +21,6 @@ public class ImageEntity extends MultiTouchEntity {
 
     public ImageEntity(int resourceId, Resources res)  {
         super(res);
-
         mResourceId = resourceId;
     }
 
@@ -41,6 +34,12 @@ public class ImageEntity extends MultiTouchEntity {
         mCenterX = e.mCenterX;
         mCenterY = e.mCenterY;
         mAngle = e.mAngle;
+    }
+
+    public ImageEntity(Bitmap image, Resources res){
+        super(res);
+        mResourceId = -1;
+        mDrawable = new BitmapDrawable(res, image);
     }
 
     public void draw(Canvas canvas) {
@@ -77,7 +76,9 @@ public class ImageEntity extends MultiTouchEntity {
         mStartMidX = startMidX;
         mStartMidY = startMidY;
 
-        mDrawable = res.getDrawable(mResourceId);
+        if (mResourceId != -1){
+            mDrawable = res.getDrawable(mResourceId);
+        }
 
         mWidth = mDrawable.getIntrinsicWidth();
         mHeight = mDrawable.getIntrinsicHeight();

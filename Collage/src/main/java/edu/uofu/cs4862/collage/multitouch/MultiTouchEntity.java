@@ -1,18 +1,17 @@
-package edu.uofu.cs4862.collage;
+package edu.uofu.cs4862.collage.multitouch;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Bitmap;
-import android.graphics.Color;
 
 import android.content.res.Resources;
 import android.content.Context;
 import android.content.res.Configuration;
 
 import android.util.DisplayMetrics;
-import android.util.Log;
 
 import java.io.Serializable;
+
+import edu.uofu.cs4862.collage.multitouch.MultiTouchController;
 
 
 public abstract class MultiTouchEntity implements Serializable {

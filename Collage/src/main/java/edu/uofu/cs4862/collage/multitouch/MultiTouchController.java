@@ -1,4 +1,4 @@
-package edu.uofu.cs4862.collage;
+package edu.uofu.cs4862.collage.multitouch;
 
 /**
  * MultiTouchController.java
@@ -607,6 +607,7 @@ public class MultiTouchController<T> {
     /** A class that packages up all MotionEvent information with all derived
      * multitouch information (if available) */
     public static class PointInfo {
+
         // Multitouch information
         private int numPoints;
         private float[] xs = new float[MAX_TOUCH_POINTS];
