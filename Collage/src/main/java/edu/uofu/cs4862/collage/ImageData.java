@@ -7,6 +7,7 @@ import android.media.ThumbnailUtils;
  * Created by Andres on 11/5/13.
  */
 public class ImageData {
+    private static final String SIZE_FORMAT_STRING = "%d X %d";
     private static final int THUMBNAIL_WIDTH = 100;
     private static final int THUMBNAIL_HEIGHT = 100;
     private final Bitmap image;
@@ -58,5 +59,9 @@ public class ImageData {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getImageSize(){
+        return String.format(SIZE_FORMAT_STRING, image.getWidth(), image.getHeight());
     }
 }

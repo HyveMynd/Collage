@@ -27,9 +27,6 @@ import static edu.uofu.cs4862.collage.multitouch.MultiTouchController.PositionAn
  */
 public class PhotoCollageView extends View implements MultiTouchController.MultiTouchObjectCanvas<MultiTouchEntity> {
 
-//    private static final int[] IMAGES = { R.drawable.m74hubble, R.drawable.catarina, R.drawable.sunset, R.drawable.lake };
-//	private static final int[] IMAGES = { R.drawable.tahiti };
-
     private ArrayList<MultiTouchEntity> mImages = new ArrayList<MultiTouchEntity>();
 
     // --
@@ -117,6 +114,10 @@ public class PhotoCollageView extends View implements MultiTouchController.Multi
         for (ImageData data : images){
             mImages.add(new ImageEntity(data.getImage(), getResources()));
         }
+    }
+
+    public void shakeImage(int position){
+
     }
 
     /** Called by activity's onPause() method to free memory used for loading the images */

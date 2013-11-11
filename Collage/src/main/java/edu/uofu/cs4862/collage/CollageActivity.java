@@ -26,6 +26,7 @@ public class CollageActivity extends Activity {
     private LinearLayout mainLayout;
     private FrameLayout collageAreaLayout, imageListLayout;
     private boolean isHorizontal;
+    private boolean isLibHidden;
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
@@ -35,6 +36,7 @@ public class CollageActivity extends Activity {
         model = ((CollageApplication)this.getApplication()).getModel();
         libraryFragment = new ImageLibraryFragment();
         collageFragment = new CollageFragment();
+        isLibHidden = false;
 
         mainLayout = new LinearLayout(this);
         mainLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -81,18 +83,21 @@ public class CollageActivity extends Activity {
         fragmentTransaction.add(collageAreaLayout.getId(), libraryFragment);
         fragmentTransaction.hide(libraryFragment);
         fragmentTransaction.commit();
+        isLibHidden = true;
     }
 
     private void hideLibrary(){
         FragmentTransaction ft = this.getFragmentManager().beginTransaction();
         ft.hide(libraryFragment);
         ft.commit();
+        isLibHidden = true;
     }
 
     private void showLibrary(){
         FragmentTransaction ft = this.getFragmentManager().beginTransaction();
         ft.show(libraryFragment);
         ft.commit();
+        isLibHidden = false;
     }
 
     @Override
@@ -111,7 +116,11 @@ public class CollageActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_add_image:
-                showLibrary();
+                if (isLibHidden){
+                    showLibrary();
+                } else {
+                    hideLibrary();
+                }
                 return true;
             case R.id.action_take_picture:
                 return true;
