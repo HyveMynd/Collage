@@ -28,12 +28,12 @@ public class CollageImageAdapter extends ArrayAdapter<ImageData> {
 
     @Override
     public int getCount() {
-        return model.count();
+        return model.totalImageCount();
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageData data = model.get(position);
+        ImageData data = model.getImage(position);
         ViewHolder holder;
         LinearLayout row = (LinearLayout)convertView;
         if (row == null){
@@ -67,7 +67,7 @@ public class CollageImageAdapter extends ArrayAdapter<ImageData> {
 
     public void add(Bitmap image, String date){
         ImageData data = new ImageData(image, date);
-        model.add(data);
+        model.addImage(data);
         notifyDataSetChanged();
     }
 

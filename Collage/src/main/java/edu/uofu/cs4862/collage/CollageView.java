@@ -3,12 +3,12 @@ package edu.uofu.cs4862.collage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -18,7 +18,6 @@ import edu.uofu.cs4862.collage.multitouch.MultiTouchEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -29,57 +28,39 @@ import static edu.uofu.cs4862.collage.multitouch.MultiTouchController.PositionAn
 /**
  * Created by andresmonroy on 11/8/13.
  */
-public class PhotoCollageView extends View implements MultiTouchController.MultiTouchObjectCanvas<MultiTouchEntity> {
+public class CollageView extends View implements MultiTouchController.MultiTouchObjectCanvas<MultiTouchEntity> {
 
     private ArrayList<MultiTouchEntity> mImages = new ArrayList<MultiTouchEntity>();
-
-    // --
-
     private MultiTouchController<MultiTouchEntity> multiTouchController =
             new MultiTouchController<MultiTouchEntity>(this);
-
-    // --
-
     private PointInfo currTouchPoint = new PointInfo();
-
     private static final int UI_MODE_ROTATE = 1, UI_MODE_ANISOTROPIC_SCALE = 2;
-
     private int mUIMode = UI_MODE_ROTATE;
-
-    // --
-
     private Paint mLinePaintTouchPointCircle = new Paint();
-
-    private static final float SCREEN_MARGIN = 100;
-
-    private int width, height, displayWidth, displayHeight;
+    private int displayWidth, displayHeight;
 
     // ---------------------------------------------------------------------------------------------------
 
-    public PhotoCollageView(Context context) {
+    public CollageView(Context context) {
         this(context, null);
     }
 
-    public PhotoCollageView(Context context, AttributeSet attrs) {
+    public CollageView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public PhotoCollageView(Context context, AttributeSet attrs, int defStyle) {
+    public CollageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(context);
     }
 
     private void init(Context context) {
         Resources res = context.getResources();
-//        for (int i = 0; i < IMAGES.length; i++)
-//            mImages.add(new ImageEntity(IMAGES[i], res));
-
         mLinePaintTouchPointCircle.setColor(Color.YELLOW);
         mLinePaintTouchPointCircle.setStrokeWidth(5);
         mLinePaintTouchPointCircle.setStyle(Paint.Style.STROKE);
         mLinePaintTouchPointCircle.setAntiAlias(true);
         setBackgroundColor(context.getResources().getColor(R.color.dark_gray));
-
         DisplayMetrics metrics = res.getDisplayMetrics();
         this.displayWidth = res.getConfiguration().orientation ==
                 Configuration.ORIENTATION_LANDSCAPE ? Math.max(metrics.widthPixels,
@@ -102,34 +83,22 @@ public class PhotoCollageView extends View implements MultiTouchController.Multi
 
     /** Called by activity's onResume() method to load the images */
     public void loadImages(Context context) {
-        int n = mImages.size();
-        if (n == 1)
-        {
-            mImages.get(0).load(context, displayWidth / 2, displayHeight / 2);
-        }
-        else
-        {
-            for (int i = 0; i < n; i++) {
-                float cx = SCREEN_MARGIN + (float)
-                        (Math.random() * (displayWidth - 2 * SCREEN_MARGIN));
-                float cy = SCREEN_MARGIN + (float)
-                        (Math.random() * (displayHeight - 2 * SCREEN_MARGIN));
-                mImages.get(i).load(context, cx, cy);
-            }
+        for (MultiTouchEntity entity : mImages){
+            entity.load(context, displayWidth / 2, displayHeight / 2);
         }
     }
 
-    public void setImages(Collection<ImageData> images){
-        for (ImageData data : images){
-            mImages.add(new ImageEntity(data.getImage(), getResources()));
+    public void setImages(Collection<Bitmap> images){
+        for (Bitmap image : images){
+            mImages.add(new ImageEntity(image, getResources()));
         }
     }
 
     /** Called by activity's onPause() method to free memory used for loading the images */
     public void unloadImages() {
-        int n = mImages.size();
-        for (int i = 0; i < n; i++)
-            mImages.get(i).unload();
+        for (MultiTouchEntity entity : mImages){
+            entity.unload();
+        }
     }
 
     // ---------------------------------------------------------------------------------------------------
@@ -137,9 +106,9 @@ public class PhotoCollageView extends View implements MultiTouchController.Multi
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        int n = mImages.size();
-        for (int i = 0; i < n; i++)
-            mImages.get(i).draw(canvas);
+        for (MultiTouchEntity entity : mImages){
+            entity.draw(canvas);
+        }
     }
 
     // ---------------------------------------------------------------------------------------------------
@@ -153,9 +122,8 @@ public class PhotoCollageView extends View implements MultiTouchController.Multi
     /** Get the image that is under the single-touch point, or return null (canceling the drag op) if none */
     public MultiTouchEntity getDraggableObjectAtPoint(PointInfo pt) {
         float x = pt.getX(), y = pt.getY();
-        int n = mImages.size();
-        for (int i = n - 1; i >= 0; i--) {
-            ImageEntity im = (ImageEntity) mImages.get(i);
+        for (MultiTouchEntity entity : mImages){
+            ImageEntity im = (ImageEntity)entity;
             if (im.containsPoint(x, y))
                 return im;
         }
@@ -190,7 +158,7 @@ public class PhotoCollageView extends View implements MultiTouchController.Multi
     public boolean setPositionAndScale(MultiTouchEntity img,
                                        PositionAndScale newImgPosAndScale, PointInfo touchPoint) {
         currTouchPoint.set(touchPoint);
-        boolean ok = ((ImageEntity)img).setPos(newImgPosAndScale);
+        boolean ok = img.setPos(newImgPosAndScale);
         if (ok)
             invalidate();
         return ok;
