@@ -10,6 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+
+import edu.uofu.cs4862.collage.multitouch.MultiTouchImageView;
 
 /**
  * Created by Andres on 11/5/13.
