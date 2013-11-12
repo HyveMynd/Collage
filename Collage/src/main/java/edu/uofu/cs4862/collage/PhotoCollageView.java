@@ -18,6 +18,10 @@ import edu.uofu.cs4862.collage.multitouch.MultiTouchEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static edu.uofu.cs4862.collage.multitouch.MultiTouchController.PointInfo;
 import static edu.uofu.cs4862.collage.multitouch.MultiTouchController.PositionAndScale;
@@ -37,8 +41,6 @@ public class PhotoCollageView extends View implements MultiTouchController.Multi
     // --
 
     private PointInfo currTouchPoint = new PointInfo();
-
-    private boolean mShowDebugInfo = false;
 
     private static final int UI_MODE_ROTATE = 1, UI_MODE_ANISOTROPIC_SCALE = 2;
 
@@ -87,12 +89,19 @@ public class PhotoCollageView extends View implements MultiTouchController.Multi
                 metrics.heightPixels) : Math.max(metrics.widthPixels, metrics.heightPixels);
     }
 
+    public void doOnResume(Context context){
+        ExecutorService exe = Executors.newSingleThreadExecutor();
+        exe.execute(new DoLoadImages(context));
+        exe.shutdown();
+        try {
+            exe.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     /** Called by activity's onResume() method to load the images */
     public void loadImages(Context context) {
-
-        Log.d("PhotoSortrView", "Width: " + this.getWidth());
-        Log.d("PhotoSortrView", "Height: " + this.getHeight());
-
         int n = mImages.size();
         if (n == 1)
         {
@@ -116,10 +125,6 @@ public class PhotoCollageView extends View implements MultiTouchController.Multi
         }
     }
 
-    public void shakeImage(int position){
-
-    }
-
     /** Called by activity's onPause() method to free memory used for loading the images */
     public void unloadImages() {
         int n = mImages.size();
@@ -135,23 +140,6 @@ public class PhotoCollageView extends View implements MultiTouchController.Multi
         int n = mImages.size();
         for (int i = 0; i < n; i++)
             mImages.get(i).draw(canvas);
-        if (mShowDebugInfo)
-            drawMultitouchDebugMarks(canvas);
-    }
-
-    // ---------------------------------------------------------------------------------------------------
-
-    private void drawMultitouchDebugMarks(Canvas canvas) {
-        if (currTouchPoint.isDown()) {
-            float[] xs = currTouchPoint.getXs();
-            float[] ys = currTouchPoint.getYs();
-            float[] pressures = currTouchPoint.getPressures();
-            int numPoints = Math.min(currTouchPoint.getNumTouchPoints(), 2);
-            for (int i = 0; i < numPoints; i++)
-                canvas.drawCircle(xs[i], ys[i], 50 + pressures[i] * 80, mLinePaintTouchPointCircle);
-            if (numPoints == 2)
-                canvas.drawLine(xs[0], ys[0], xs[1], ys[1], mLinePaintTouchPointCircle);
-        }
     }
 
     // ---------------------------------------------------------------------------------------------------
@@ -210,5 +198,18 @@ public class PhotoCollageView extends View implements MultiTouchController.Multi
 
     public boolean pointInObjectGrabArea(PointInfo pt, MultiTouchEntity img) {
         return false;
+    }
+
+    class DoLoadImages implements Runnable{
+        Context context;
+
+        DoLoadImages(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        public void run() {
+            loadImages(context);
+        }
     }
 }
