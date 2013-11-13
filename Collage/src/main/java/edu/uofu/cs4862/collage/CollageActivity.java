@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,6 +24,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -30,6 +32,8 @@ import java.util.Date;
  * Created by Andres on 11/5/13.
  */
 public class CollageActivity extends Activity {
+    private static final int CAMERA_ACTION = 42;
+    private static final String JPEG_FILE_SUFFIX = ".jpg";
     private CollageModel model;
     private ImageLibraryFragment libraryFragment;
     private CollageFragment collageFragment;
@@ -37,9 +41,9 @@ public class CollageActivity extends Activity {
     private FrameLayout collageAreaLayout, imageListLayout;
     private boolean isHorizontal;
     private boolean isLibHidden;
-    private String imagePath;
+    private String mCurrentPhotoPath;
+    private String mCurrentPhotoTimeStamp;
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,7 +73,7 @@ public class CollageActivity extends Activity {
             verticalInit();
             isHorizontal = false;
         }
-        ((CollageApplication)getApplication()).loadTestData(getResources());
+//        ((CollageApplication)getApplication()).loadTestData(getResources());
     }
 
     private int getScreenOrientation(){
@@ -141,27 +145,35 @@ public class CollageActivity extends Activity {
     }
 
     private void openCamera(){
-        imagePath =  new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) + ".jpg";
-        File imageFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), imagePath);
-        Intent cameraIntent = new Intent();
-        cameraIntent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(imageFile));
-        startActivityForResult(cameraIntent, R.id.action_take_picture);
+        File imageFile = createImageFile();
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        Uri uri = Uri.fromFile(imageFile);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        startActivityForResult(cameraIntent, CAMERA_ACTION);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == R.id.action_take_picture &&  resultCode == RESULT_OK){
+        if (requestCode == CAMERA_ACTION &&  resultCode == RESULT_OK){
             handlePhotoCapture();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void handlePhotoCapture(){
-        File imageFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), imagePath);
-        Bitmap mainImage = BitmapFactory.decodeFile(imageFile.getPath());
-        ImageData data = new ImageData(mainImage, imagePath.substring(0, imagePath.indexOf('.')));
+        Bitmap mainImage = BitmapFactory.decodeFile(mCurrentPhotoPath);
+        ImageData data = new ImageData(mainImage, mCurrentPhotoTimeStamp);
         model.addImage(data);
+    }
+
+    private File createImageFile() {
+        // Create an image file name
+        mCurrentPhotoTimeStamp =
+                new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
+        String imageFileName = mCurrentPhotoTimeStamp + JPEG_FILE_SUFFIX;
+        File image = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), imageFileName);
+        mCurrentPhotoPath = image.getPath();
+        return image;
     }
 
     @Override

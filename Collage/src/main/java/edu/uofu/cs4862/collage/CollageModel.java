@@ -1,16 +1,7 @@
 package edu.uofu.cs4862.collage;
 
-import android.graphics.BitmapFactory;
-
-import com.google.gson.Gson;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Created by Andres on 11/5/13.
